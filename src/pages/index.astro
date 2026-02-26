@@ -1,8 +1,8 @@
 ---
-import LibrarySection from '../components/LibrarySection.astro';
+import {LibrarySection} from '../components/LibrarySection.tsx';
 import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-	<LibrarySection />
+	<LibrarySection client:load />
 </Layout>
