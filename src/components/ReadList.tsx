@@ -1,11 +1,18 @@
-export function ReadList({ readList, handleRemoveFromReadList }: any) {
+import type { Book } from "@/types";
+
+interface ReadListProps {
+  readList: Book[];
+  handleRemoveFromReadList: (isbn: string) => void;
+}
+
+export function ReadList({ readList, handleRemoveFromReadList }: ReadListProps) {
   return (
     <article className="rounded-xl border border-white/10 p-4">
       <p className="text-4xl font-semibold mb-8 text-center">
         Lista de lectura
       </p>
       <div className="flex flex-wrap gap-4 justify-center">
-        {readList.map((book: any) => (
+        {readList.map((book: Book) => (
           <div key={book.ISBN} className="relative">
             <img className="w-32 h-48" src={book.cover} alt={book.title} />
             <button

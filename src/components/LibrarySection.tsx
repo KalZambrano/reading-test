@@ -1,24 +1,42 @@
 import { DefaultLibrary } from "./DefaultLibrary";
 import { library } from "@/data/books.json";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ReadList } from "./ReadList";
-
-interface Book {
-  title: string;
-  pages: number;
-  genre: string;
-  cover: string;
-  synopsis: string;
-  year: number;
-  ISBN: string;
-  author: {
-    name: string;
-    otherBooks: string[];
-  };
-}
+import type { Book } from "@/types";
 
 export function LibrarySection() {
   const [readList, setReadList] = useState<Book[]>([]);
+
+  useEffect(() => {
+    // Cargar datos iniciales desde localStorage
+    const readListJSON = localStorage.getItem("readList");
+    if (readListJSON) {
+      try {
+        setReadList(JSON.parse(readListJSON));
+      } catch (error) {
+        console.error("Error parsing readList from localStorage:", error);
+      }
+    }
+
+    // Escuchar cambios en otras pestañas
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === "readList" && event.newValue) {
+        try {
+          const newReadList = JSON.parse(event.newValue);
+          setReadList(newReadList);
+        } catch (error) {
+          console.error("Error parsing readList from storage event:", error);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    // Limpiar el event listener cuando el componente se desmonte
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   // Agregar un libro a la lista de lectura
   const handleAddToReadList = (book: Book) => {
@@ -26,13 +44,28 @@ export function LibrarySection() {
 
     if (exists) return;
 
-    setReadList([...readList, book]);
+    const newReadList = [...readList, book];
+    setReadList(newReadList);
+    
+    // Disparar evento personalizado para sincronización inmediata en la misma pestaña
+    localStorage.setItem("readList", JSON.stringify(newReadList));
+    window.dispatchEvent(new StorageEvent("storage", {
+      key: "readList",
+      newValue: JSON.stringify(newReadList)
+    }));
   };
 
   // Remover un libro de la lista de lectura
   const handleRemoveFromReadList = (isbn: string) => {
-    setReadList(readList.filter((book: Book) => book.ISBN !== isbn));
-    // console.log(readList);
+    const newReadList = readList.filter((book: Book) => book.ISBN !== isbn);
+    setReadList(newReadList);
+    
+    // Disparar evento personalizado para sincronización inmediata en la misma pestaña
+    localStorage.setItem("readList", JSON.stringify(newReadList));
+    window.dispatchEvent(new StorageEvent("storage", {
+      key: "readList",
+      newValue: JSON.stringify(newReadList)
+    }));
   };
 
   return (

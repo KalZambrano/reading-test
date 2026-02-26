@@ -1,19 +1,25 @@
 import { FilterSection } from "./FilterSection";
-
 import { useState } from "react";
+import type { Book } from "@/types";
+
+interface DefaultLibraryProps {
+  library: { book: Book }[];
+  handleAddToReadList: (book: Book) => void;
+  readList: Book[];
+}
 
 export function DefaultLibrary({
   library,
   handleAddToReadList,
   readList,
-}: any) {
+}: DefaultLibraryProps) {
   // const [books, setBooks] = useState(library);
 
   const [maxPages, setMaxPages] = useState(1200);
   const [genre, setGenre] = useState("");
 
   // Filtro por género y páginas
-  const filteredBooks = library.filter((book: Record<string, any>) => {
+  const filteredBooks = library.filter((book: { book: Book }) => {
     const matchGenre = genre === "" || book.book.genre === genre;
 
     const matchPages = book.book.pages <= maxPages;
@@ -23,7 +29,7 @@ export function DefaultLibrary({
 
   // Verificar si un libro está en la lista de lectura
   const isInReadList = (isbn: string) => {
-    return readList.some((book: any) => book.ISBN === isbn);
+    return readList.some((book: Book) => book.ISBN === isbn);
   };
 
   return (
@@ -40,7 +46,7 @@ export function DefaultLibrary({
       />
 
       <section className="flex gap-6 flex-wrap">
-        {filteredBooks.map(({ book }: any) => {
+        {filteredBooks.map(({ book }: { book: Book }) => {
           const added = isInReadList(book.ISBN);
 
           return (
